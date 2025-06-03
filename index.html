@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ThatDev - Coming Soon</title>
+    <meta name="description" content="ThatDev - Memory Quest Game. Play our space-themed memory card game while waiting for our launch!">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>ThatDev - Memory Quest</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>">
     <style>
         * {
             margin: 0;
@@ -15,336 +20,596 @@
             font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
+            overflow-x: hidden;
         }
 
-        /* Animated background particles */
-        .particles {
-            position: absolute;
+        .stars {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             pointer-events: none;
+            z-index: 1;
         }
 
-        .particle {
+        .star {
             position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.5);
+            width: 2px;
+            height: 2px;
+            background: white;
             border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
+            opacity: 0.8;
+            animation: twinkle 3s infinite;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
-            50% { transform: translateY(-100px) rotate(180deg); opacity: 0.5; }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
         }
 
         .container {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 60px 40px;
-            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            max-width: 600px;
-            width: 90%;
             position: relative;
-            z-index: 10;
-            animation: slideIn 1s ease-out;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
         }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(50px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .header {
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeInDown 1s ease-out;
         }
 
         .logo {
-            font-size: 4rem;
+            font-size: 3em;
             font-weight: bold;
-            color: #fff;
-            margin-bottom: 20px;
-            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             animation: glow 2s ease-in-out infinite alternate;
         }
 
         @keyframes glow {
-            from { text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.3); }
-            to { text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 255, 255, 0.5); }
+            from { text-shadow: 0 0 20px rgba(255, 255, 255, 0.5); }
+            to { text-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 255, 255, 0.6); }
         }
 
         .tagline {
-            font-size: 1.5rem;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 30px;
-            font-weight: 300;
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 20px;
         }
 
-        .description {
-            font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.8);
-            margin-bottom: 40px;
-            line-height: 1.6;
+        .game-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px auto;
+            max-width: 600px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            animation: fadeInUp 1s ease-out 0.5s both;
         }
 
-        .coming-soon {
-            font-size: 2.5rem;
-            color: #fff;
-            margin-bottom: 30px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            animation: pulse 2s infinite;
+        .game-title {
+            color: white;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .game-card {
+            aspect-ratio: 1;
+            background: linear-gradient(145deg, #667eea, #764ba2);
+            border-radius: 15px;
+            border: none;
+            cursor: pointer;
+            font-size: 2em;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-card.flipped {
+            background: linear-gradient(145deg, #4ecdc4, #44a08d);
+            transform: rotateY(180deg);
+        }
+
+        .game-card.matched {
+            background: linear-gradient(145deg, #56ab2f, #a8e6cf);
+            animation: pulse 0.6s ease-in-out;
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            color: white;
+        }
+
+        .difficulty-selector {
+            margin: 20px 0;
+            color: white;
+        }
+
+        .difficulty-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 15px;
+            border-radius: 15px;
+            margin: 0 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-btn.active {
+            background: linear-gradient(145deg, #ff6b6b, #ee5a52);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .high-scores {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            color: white;
+            display: none;
+        }
+
+        .high-scores.show {
+            display: block;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            padding: 5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .game-controls {
+            margin: 20px 0;
+        }
+
+        .btn {
+            background: linear-gradient(145deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .notification {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: bold;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .footer {
+            color: white;
+            margin-top: 40px;
+            opacity: 0.8;
+            animation: fadeIn 1s ease-out 1s both;
         }
 
         .email-signup {
-            margin: 40px 0;
-        }
-
-        .email-form {
-            display: flex;
-            gap: 10px;
-            max-width: 400px;
-            margin: 0 auto;
-            flex-wrap: wrap;
-            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .email-input {
-            flex: 1;
-            min-width: 250px;
-            padding: 15px 20px;
-            border: none;
-            border-radius: 50px;
             background: rgba(255, 255, 255, 0.2);
-            color: #fff;
-            font-size: 1rem;
-            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
+            border-radius: 25px;
+            padding: 12px 20px;
+            color: white;
+            font-size: 1em;
+            margin: 0 10px;
+            width: 250px;
         }
 
         .email-input::placeholder {
             color: rgba(255, 255, 255, 0.7);
         }
 
-        .email-input:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.02);
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .notify-btn {
-            padding: 15px 30px;
-            background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 120px;
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .notify-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.4);
-        }
-
-        .social-links {
-            margin-top: 40px;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .social-link {
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .social-link:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .footer {
-            margin-top: 40px;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.9rem;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         @media (max-width: 768px) {
-            .container {
-                padding: 40px 20px;
-                margin: 20px;
-            }
-            
-            .logo {
-                font-size: 3rem;
-            }
-            
-            .coming-soon {
-                font-size: 2rem;
-            }
-            
-            .email-form {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .email-input {
-                min-width: 100%;
-                margin-bottom: 10px;
-            }
-        }
-
-        /* Success message */
-        .success-message {
-            background: rgba(76, 175, 80, 0.2);
-            border: 1px solid rgba(76, 175, 80, 0.5);
-            color: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            margin-top: 20px;
-            display: none;
-            backdrop-filter: blur(10px);
+            .logo { font-size: 2em; }
+            .game-board { grid-template-columns: repeat(3, 1fr); max-width: 300px; }
+            .email-input { width: 200px; margin: 10px 0; }
+            .btn { margin: 5px; }
         }
     </style>
 </head>
 <body>
-    <div class="particles"></div>
+    <div class="stars" id="stars"></div>
     
     <div class="container">
-        <div class="logo">ThatDev</div>
-        <div class="tagline">Professional Development Solutions</div>
-        <div class="description">
-            I am a developer passionate about creating innovative solutions and bringing ideas to life through code.
+        <div class="header">
+            <div class="logo">ThatDev</div>
+            <div class="tagline">Something Amazing is Coming Soon</div>
         </div>
-        
-        <div class="coming-soon">Coming Soon</div>
-        
-        <div class="email-signup">
-            <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 20px;">
-                🚀 Be the first to know when we launch!
-            </p>
-            <form class="email-form" id="emailForm">
-                <input 
-                    type="email" 
-                    class="email-input" 
-                    placeholder="Enter your email address" 
-                    required
-                    id="emailInput"
-                >
-                <button type="submit" class="notify-btn">Notify Me</button>
-            </form>
-            <div class="success-message" id="successMessage">
-                ✅ Thanks! You'll be notified when ThatDev launches.
+
+        <div class="game-container">
+            <div class="game-title">🚀 Memory Quest</div>
+            <div class="difficulty-selector">
+                <button class="difficulty-btn active" onclick="setDifficulty('easy')">Easy</button>
+                <button class="difficulty-btn" onclick="setDifficulty('medium')">Medium</button>
+                <button class="difficulty-btn" onclick="setDifficulty('hard')">Hard</button>
             </div>
+            <div class="game-stats">
+                <div class="stat">
+                    <span class="stat-number" id="moves">0</span>
+                    <span class="stat-label">Moves</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="score">0</span>
+                    <span class="stat-label">Score</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="timer">00:00</span>
+                    <span class="stat-label">Time</span>
+                </div>
+            </div>
+            
+            <div class="game-board" id="gameBoard"></div>
+            
+            <div class="game-controls">
+                <button class="btn" onclick="startGame()">New Game</button>
+                <button class="btn" onclick="resetGame()">Reset</button>
+                <button class="btn" onclick="toggleHighScores()">High Scores</button>
+            </div>
+
+            <div class="high-scores" id="highScores">
+                <h3 style="margin-bottom: 10px;">🏆 High Scores</h3>
+                <div id="highScoresList"></div>
+            </div>
+            
+            <div class="notification" id="notification"></div>
         </div>
-        
-        <div class="social-links">
-            <a href="#" class="social-link" title="GitHub">
-                <span>⚡</span>
-            </a>
-            <a href="#" class="social-link" title="LinkedIn">
-                <span>💼</span>
-            </a>
-            <a href="#" class="social-link" title="Twitter">
-                <span>🐦</span>
-            </a>
-            <a href="mailto:hello@thatdev.com" class="social-link" title="Email">
-                <span>📧</span>
-            </a>
+
+        <div class="email-signup">
+            <h3 style="color: white; margin-bottom: 15px;">🎯 Get Notified When We Launch!</h3>
+            <input type="email" class="email-input" placeholder="Enter your email" id="emailInput">
+            <button class="btn" onclick="subscribe()">Notify Me</button>
         </div>
-        
+
         <div class="footer">
-            © 2025 ThatDev. Something amazing is coming.
+            <p>🌟 Play the game while you wait • Follow our journey to launch</p>
+            <p style="margin-top: 10px; font-size: 0.9em;">© 2025 ThatDev. Preparing something extraordinary.</p>
         </div>
     </div>
 
     <script>
-        // Create animated particles
-        function createParticles() {
-            const particlesContainer = document.querySelector('.particles');
-            const particleCount = 50;
-            
-            for (let i = 0; i < particleCount; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 6 + 's';
-                particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
-                particlesContainer.appendChild(particle);
+        // Create animated stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
             }
         }
 
-        // Handle email form submission
-        document.getElementById('emailForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        // Game variables
+        let gameBoard = [];
+        let flippedCards = [];
+        let moves = 0;
+        let matches = 0;
+        let gameTimer = null;
+        let seconds = 0;
+        let gameStarted = false;
+        let score = 0;
+        let difficulty = 'easy';
+        let timeLimit = 0;
+
+        const symbols = ['🚀', '⭐', '🌙', '🛸', '🌍', '☄️', '🌌', '👽', '🌠', '🪐', '🌑', '🌕'];
+        const difficulties = {
+            easy: { pairs: 8, timeLimit: 0 },
+            medium: { pairs: 12, timeLimit: 120 },
+            hard: { pairs: 16, timeLimit: 180 }
+        };
+
+        // Sound effects
+        const sounds = {
+            flip: new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU'),
+            match: new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU'),
+            win: new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU')
+        };
+
+        function setDifficulty(level) {
+            difficulty = level;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.toLowerCase() === level) {
+                    btn.classList.add('active');
+                }
+            });
+            resetGame();
+            initGame();
+        }
+
+        function initGame() {
+            const gameBoardElement = document.getElementById('gameBoard');
+            gameBoardElement.innerHTML = '';
             
-            const emailInput = document.getElementById('emailInput');
-            const successMessage = document.getElementById('successMessage');
-            const email = emailInput.value;
+            const numPairs = difficulties[difficulty].pairs;
+            const cardSymbols = [...symbols.slice(0, numPairs), ...symbols.slice(0, numPairs)];
+            cardSymbols.sort(() => Math.random() - 0.5);
             
-            if (email) {
-                // Here you would typically send the email to your backend
-                console.log('Email submitted:', email);
-                
-                // Show success message
-                successMessage.style.display = 'block';
-                emailInput.value = '';
-                
-                // Hide success message after 5 seconds
-                setTimeout(() => {
-                    successMessage.style.display = 'none';
-                }, 5000);
+            gameBoardElement.style.gridTemplateColumns = `repeat(${Math.ceil(Math.sqrt(numPairs * 2))}, 1fr)`;
+            
+            gameBoard = [];
+            for (let i = 0; i < numPairs * 2; i++) {
+                const card = document.createElement('button');
+                card.className = 'game-card';
+                card.dataset.symbol = cardSymbols[i];
+                card.dataset.index = i;
+                card.onclick = () => flipCard(i);
+                gameBoardElement.appendChild(card);
+                gameBoard.push({
+                    element: card,
+                    symbol: cardSymbols[i],
+                    flipped: false,
+                    matched: false
+                });
             }
-        });
+        }
 
-        // Initialize particles when page loads
-        window.addEventListener('load', createParticles);
+        function flipCard(index) {
+            if (!gameStarted) {
+                startTimer();
+                gameStarted = true;
+            }
 
-        // Add some interactive effects
-        document.querySelector('.logo').addEventListener('click', function() {
-            this.style.transform = 'scale(1.1)';
-            setTimeout(() => {
-                this.style.transform = 'scale(1)';
-            }, 200);
-        });
+            const card = gameBoard[index];
+            if (card.flipped || card.matched || flippedCards.length >= 2) return;
+
+            sounds.flip.play();
+            card.flipped = true;
+            card.element.textContent = card.symbol;
+            card.element.classList.add('flipped');
+            flippedCards.push(index);
+
+            if (flippedCards.length === 2) {
+                moves++;
+                document.getElementById('moves').textContent = moves;
+                
+                setTimeout(checkMatch, 600);
+            }
+        }
+
+        function checkMatch() {
+            const [first, second] = flippedCards;
+            const firstCard = gameBoard[first];
+            const secondCard = gameBoard[second];
+
+            if (firstCard.symbol === secondCard.symbol) {
+                sounds.match.play();
+                firstCard.matched = true;
+                secondCard.matched = true;
+                firstCard.element.classList.add('matched');
+                secondCard.element.classList.add('matched');
+                
+                matches++;
+                updateScore();
+                document.getElementById('matches').textContent = matches;
+                
+                if (matches === difficulties[difficulty].pairs) {
+                    endGame();
+                }
+            } else {
+                firstCard.flipped = false;
+                secondCard.flipped = false;
+                firstCard.element.textContent = '';
+                secondCard.element.textContent = '';
+                firstCard.element.classList.remove('flipped');
+                secondCard.element.classList.remove('flipped');
+            }
+            
+            flippedCards = [];
+        }
+
+        function updateScore() {
+            const timeBonus = Math.max(0, 1000 - seconds * 2);
+            const moveBonus = Math.max(0, 500 - moves * 10);
+            score = (matches * 100) + timeBonus + moveBonus;
+            document.getElementById('score').textContent = score;
+        }
+
+        function startTimer() {
+            gameTimer = setInterval(() => {
+                seconds++;
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                document.getElementById('timer').textContent = 
+                    `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+                if (difficulties[difficulty].timeLimit > 0 && seconds >= difficulties[difficulty].timeLimit) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            clearInterval(gameTimer);
+            gameStarted = false;
+            sounds.win.play();
+            
+            if (matches === difficulties[difficulty].pairs) {
+                saveHighScore();
+                showNotification(`🎉 Congratulations! You completed the game in ${moves} moves and ${document.getElementById('timer').textContent}! Score: ${score}`);
+            } else {
+                showNotification(`⏰ Time's up! Your score: ${score}`);
+            }
+        }
+
+        function saveHighScore() {
+            const highScores = JSON.parse(localStorage.getItem('memoryHighScores') || '{}');
+            if (!highScores[difficulty]) {
+                highScores[difficulty] = [];
+            }
+            
+            highScores[difficulty].push({
+                score,
+                moves,
+                time: document.getElementById('timer').textContent,
+                date: new Date().toLocaleDateString()
+            });
+            
+            highScores[difficulty].sort((a, b) => b.score - a.score);
+            highScores[difficulty] = highScores[difficulty].slice(0, 5);
+            
+            localStorage.setItem('memoryHighScores', JSON.stringify(highScores));
+            updateHighScoresDisplay();
+        }
+
+        function updateHighScoresDisplay() {
+            const highScores = JSON.parse(localStorage.getItem('memoryHighScores') || '{}');
+            const scoresList = document.getElementById('highScoresList');
+            scoresList.innerHTML = '';
+            
+            if (highScores[difficulty]) {
+                highScores[difficulty].forEach((score, index) => {
+                    const scoreItem = document.createElement('div');
+                    scoreItem.className = 'score-item';
+                    scoreItem.innerHTML = `
+                        <span>#${index + 1} ${score.score} pts</span>
+                        <span>${score.moves} moves • ${score.time}</span>
+                    `;
+                    scoresList.appendChild(scoreItem);
+                });
+            }
+        }
+
+        function toggleHighScores() {
+            const highScores = document.getElementById('highScores');
+            highScores.classList.toggle('show');
+            if (highScores.classList.contains('show')) {
+                updateHighScoresDisplay();
+            }
+        }
+
+        function startGame() {
+            resetGame();
+            initGame();
+        }
+
+        function resetGame() {
+            clearInterval(gameTimer);
+            moves = 0;
+            matches = 0;
+            seconds = 0;
+            score = 0;
+            gameStarted = false;
+            flippedCards = [];
+            
+            document.getElementById('moves').textContent = '0';
+            document.getElementById('score').textContent = '0';
+            document.getElementById('timer').textContent = '00:00';
+            
+            hideNotification();
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.add('show');
+        }
+
+        function hideNotification() {
+            const notification = document.getElementById('notification');
+            notification.classList.remove('show');
+        }
+
+        function subscribe() {
+            const email = document.getElementById('emailInput').value;
+            if (email && email.includes('@')) {
+                showNotification('🎯 Thanks for subscribing! We\'ll notify you when we launch.');
+                document.getElementById('emailInput').value = '';
+            } else {
+                showNotification('⚠️ Please enter a valid email address.');
+            }
+        }
+
+        // Initialize everything
+        createStars();
+        initGame();
     </script>
 </body>
 </html>
