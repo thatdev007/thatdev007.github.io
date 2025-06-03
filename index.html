@@ -377,6 +377,7 @@
         let score = 0;
         let difficulty = 'easy';
         let timeLimit = 0;
+        let matchCheckTimeout = null;
 
         const symbols = ['🚀', '⭐', '🌙', '🛸', '🌍', '☄️', '🌌', '👽', '🌠', '🪐', '🌑', '🌕'];
         const difficulties = {
@@ -386,11 +387,11 @@
         };
 
         // Sound effects
-        const sounds = {
-            flip: new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU'),
-            match: new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU'),
-            win: new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU')
-        };
+        // const sounds = {
+        //     flip: new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU'),
+        //     match: new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU'),
+        //     win: new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU')
+        // };
 
         function setDifficulty(level) {
             difficulty = level;
@@ -440,7 +441,7 @@
             const card = gameBoard[index];
             if (card.flipped || card.matched || flippedCards.length >= 2) return;
 
-            sounds.flip.play();
+            // sounds.flip.play();
             card.flipped = true;
             card.element.textContent = card.symbol;
             card.element.classList.add('flipped');
@@ -449,8 +450,7 @@
             if (flippedCards.length === 2) {
                 moves++;
                 document.getElementById('moves').textContent = moves;
-                
-                setTimeout(checkMatch, 600);
+                checkMatch();
             }
         }
 
@@ -460,7 +460,7 @@
             const secondCard = gameBoard[second];
 
             if (firstCard.symbol === secondCard.symbol) {
-                sounds.match.play();
+                // sounds.match.play();
                 firstCard.matched = true;
                 secondCard.matched = true;
                 firstCard.element.classList.add('matched');
@@ -474,12 +474,17 @@
                     endGame();
                 }
             } else {
-                firstCard.flipped = false;
-                secondCard.flipped = false;
-                firstCard.element.textContent = '';
-                secondCard.element.textContent = '';
-                firstCard.element.classList.remove('flipped');
-                secondCard.element.classList.remove('flipped');
+                matchCheckTimeout = setTimeout(() => {
+                    if (gameBoard[first] && gameBoard[second]) {
+                        gameBoard[first].flipped = false;
+                        gameBoard[second].flipped = false;
+                        gameBoard[first].element.textContent = '';
+                        gameBoard[second].element.textContent = '';
+                        gameBoard[first].element.classList.remove('flipped');
+                        gameBoard[second].element.classList.remove('flipped');
+                    }
+                    matchCheckTimeout = null;
+                }, 1000);
             }
             
             flippedCards = [];
@@ -509,7 +514,7 @@
         function endGame() {
             clearInterval(gameTimer);
             gameStarted = false;
-            sounds.win.play();
+            // sounds.win.play();
             
             if (matches === difficulties[difficulty].pairs) {
                 saveHighScore();
@@ -572,6 +577,10 @@
 
         function resetGame() {
             clearInterval(gameTimer);
+            if (matchCheckTimeout) {
+                clearTimeout(matchCheckTimeout);
+                matchCheckTimeout = null;
+            }
             moves = 0;
             matches = 0;
             seconds = 0;
