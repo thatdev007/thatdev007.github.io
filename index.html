@@ -439,9 +439,21 @@
             }
 
             const card = gameBoard[index];
+            // Prevent flipping if card is already flipped, matched, or two cards are already face up
             if (card.flipped || card.matched || flippedCards.length >= 2) return;
 
-            // sounds.flip.play();
+            // If a match check is pending from a previous pair,
+            // clear it and immediately flip back those cards before flipping the new one.
+            // This prevents multiple timeouts and potential state conflicts.
+            if (matchCheckTimeout) {
+                 clearTimeout(matchCheckTimeout);
+                 matchCheckTimeout = null;
+                 // Immediately process the pending flipped cards as if the timeout just finished
+                 // Call a helper function to handle the flip back based on the pending pair
+                 handlePendingUnmatchedFlipBack();
+            }
+
+            // sounds.flip.play(); // Re-add sound if desired later
             card.flipped = true;
             card.element.textContent = card.symbol;
             card.element.classList.add('flipped');
@@ -450,16 +462,93 @@
             if (flippedCards.length === 2) {
                 moves++;
                 document.getElementById('moves').textContent = moves;
-                checkMatch();
+                
+                // Set a timeout to call checkMatch after a delay
+                matchCheckTimeout = setTimeout(checkMatch, 600);
             }
         }
 
+        // Helper function to immediately flip back cards if a pending match check is interrupted
+        function handlePendingUnmatchedFlipBack() {
+             if (flippedCards.length === 2) {
+                 const [firstIndex, secondIndex] = flippedCards;
+                 const firstCard = gameBoard[firstIndex];
+                 const secondCard = gameBoard[secondIndex];
+
+                 // Only attempt to flip back if cards exist and are currently flipped and not matched
+                 if (firstCard && secondCard &&
+                     firstCard.element && secondCard.element &&
+                     firstCard.flipped && !firstCard.matched &&
+                     secondCard.flipped && !secondCard.matched) {
+
+                     firstCard.flipped = false;
+                     secondCard.flipped = false;
+                     firstCard.element.textContent = '';
+                     secondCard.element.textContent = '';
+                     firstCard.element.classList.remove('flipped');
+                     secondCard.element.classList.remove('flipped');
+                 } else {
+                      // Log if the state was unexpected when trying to flip back immediately
+                      console.warn("Attempted immediate flip back, but card state was inconsistent.", {
+                          firstIndex: firstIndex,
+                          secondIndex: secondIndex,
+                          firstCardState: firstCard ? { flipped: firstCard.flipped, matched: firstCard.matched, elementExists: !!firstCard.element } : null,
+                          secondCardState: secondCard ? { flipped: secondCard.flipped, matched: secondCard.matched, elementExists: !!secondCard.element } : null,
+                          flippedCardsState: [...flippedCards] // State of the array when flip back was attempted
+                      });
+                 }
+             }
+            // Always clear flippedCards after handling
+            flippedCards = [];
+        }
+
         function checkMatch() {
-            const [first, second] = flippedCards;
-            const firstCard = gameBoard[first];
-            const secondCard = gameBoard[second];
+            // The timeout has finished, so clear the timeout ID first
+            matchCheckTimeout = null;
+
+            // Ensure there are exactly two cards that were flipped for this check
+            if (flippedCards.length !== 2) {
+                 console.error("checkMatch executed with unexpected number of flipped cards.", flippedCards.length);
+                // If the state is bad, just reset the flippedCards and stop
+                flippedCards = [];
+                return;
+            }
+
+            const [firstIndex, secondIndex] = flippedCards;
+
+            // Add very strict checks to ensure cards are valid and in the expected state
+            // before proceeding with match logic or flipping back.
+            const firstCard = gameBoard[firstIndex];
+            const secondCard = gameBoard[secondIndex];
+
+            if (!firstCard || !secondCard ||
+                !firstCard.element || !secondCard.element ||
+                !firstCard.flipped || !secondCard.flipped ||
+                firstCard.matched || secondCard.matched) // Ensure they haven't been matched by another process
+            {
+                 console.error("checkMatch found cards in an invalid or unexpected state.", {firstIndex, secondIndex, firstCard, secondCard});
+                // If state is bad, just reset flippedCards and stop
+                flippedCards = [];
+                return;
+            }
+
+            // Now we are confident firstCard and secondCard are valid, *currently flipped*, and *not matched* objects
+
+            // *** DIAGNOSTIC LOGGING ***
+            console.log("Checking match:", {
+                firstIndex: firstIndex,
+                secondIndex: secondIndex,
+                firstSymbol: firstCard.symbol,
+                secondSymbol: secondCard.symbol,
+                symbolsMatch: firstCard.symbol === secondCard.symbol,
+                firstCardState: { flipped: firstCard.flipped, matched: firstCard.matched },
+                secondCardState: { flipped: secondCard.flipped, matched: secondCard.matched },
+                flippedCardsArrayState: [...flippedCards] // State of the array when checkMatch starts
+            });
+             // *** END DIAGNOSTIC LOGGING ***
 
             if (firstCard.symbol === secondCard.symbol) {
+                // Cards match
                 // sounds.match.play();
                 firstCard.matched = true;
                 secondCard.matched = true;
@@ -474,19 +563,30 @@
                     endGame();
                 }
             } else {
-                matchCheckTimeout = setTimeout(() => {
-                    if (gameBoard[first] && gameBoard[second]) {
-                        gameBoard[first].flipped = false;
-                        gameBoard[second].flipped = false;
-                        gameBoard[first].element.textContent = '';
-                        gameBoard[second].element.textContent = '';
-                        gameBoard[first].element.classList.remove('flipped');
-                        gameBoard[second].element.classList.remove('flipped');
-                    }
-                    matchCheckTimeout = null;
-                }, 1000);
+                // Cards do not match, flip them back
+                // Add a final check on the element before modifying
+                if (firstCard.element && secondCard.element) {
+                    firstCard.flipped = false;
+                    secondCard.flipped = false;
+                    firstCard.element.textContent = '';
+                    secondCard.element.textContent = '';
+                    firstCard.element.classList.remove('flipped');
+                    secondCard.element.classList.remove('flipped');
+                } else {
+                     // Log if element is null right before attempting to modify it
+                     console.error("Attempted to flip back unmatched cards, but element was null.", {
+                         firstIndex: firstIndex,
+                         secondIndex: secondIndex,
+                         firstElementExists: !!(firstCard && firstCard.element),
+                         secondElementExists: !!(secondCard && secondCard.element)
+                     });
+                      // As a last resort in this bad state, clear flippedCards
+                     flippedCards = [];
+                 }
             }
             
+            // Always clear flippedCards after a match check is processed
+            // This is done at the very end of checkMatch.
             flippedCards = [];
         }
 
